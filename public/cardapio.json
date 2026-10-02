@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "nome": "Hambúrguer Xica's Clássico",
+    "descricao": "Pão brioche artesanal selado na manteiga, blend de carne de novilho 180g, queijo cheddar derretido, cebola caramelizada e molho especial da casa.",
+    "preco": 32.90
+  },
+  {
+    "id": 2,
+    "nome": "Smash Burger Duplo",
+    "descricao": "Pão brioche super macio, dois blends smash de 90g prensados na chapa, duplo american cheese, picles artesanal e mostarda escura.",
+    "preco": 28.50
+  },
+  {
+    "id": 3,
+    "nome": "Cheddar Bacon Supremo",
+    "descricao": "Pão australiano escuro, blend de 180g, generosa camada de creme de cheddar original e farofa de bacon crocante.",
+    "preco": 36.00
+  },
+  {
+    "id": 4,
+    "nome": "Xica's Veggie",
+    "descricao": "Pão rústico vegano, hambúrguer artesanal de grão de bico com especiarias, maionese verde de castanhas, alface americana e tomate fresco.",
+    "preco": 30.00
+  },
+  {
+    "id": 5,
+    "nome": "Porção de Batatas Rústicas",
+    "descricao": "Batatas com casca cortadas à mão, fritas na perfeição, temperadas com sal grosso, alecrim fresco e dentes de alho confitados.",
+    "preco": 15.00
+  },
+  {
+    "id": 6,
+    "nome": "Dadinhos de Tapioca",
+    "descricao": "Porção de 10 dadinhos crocantes de tapioca com queijo coalho. Acompanha a nossa clássica geleia de pimenta agridoce.",
+    "preco": 22.00
+  },
+  {
+    "id": 7,
+    "nome": "Limonada Suíça Artesanal",
+    "descricao": "Limonada super refrescante batida na hora com limão tahiti, um toque especial de hortelã e muito gelo.",
+    "preco": 9.00
+  },
+  {
+    "id": 8,
+    "nome": "Chá Mate com Pêssego",
+    "descricao": "Chá mate gelado batido com xarope artesanal de pêssego e rodelas de limão siciliano. Copo de 500ml.",
+    "preco": 10.00
+  },
+  {
+    "id": 9,
+    "nome": "Mini Pudim Artesanal",
+    "descricao": "O clássico pudim de leite condensado, sem furinhos, com uma calda de caramelo rica e brilhante. Receita de família.",
+    "preco": 12.00
+  }
+]
