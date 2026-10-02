@@ -136,3 +136,14 @@
     <p>&copy; 2026 Todos os direitos reservados.</p>
   </div>
 </footer>
+
+<!-- Banner de Cookies / Armazenamento Local -->
+@if (mostrarAvisoCookies) {
+  <div class="cookie-banner animate-slide-up">
+    <div class="cookie-content">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 12.5v.01"/><path d="M12 16v.01"/><path d="M11 12.5v.01"/></svg>
+      <p>Utilizamos cookies e armazenamento local para guardar os itens do seu pedido durante o dia de hoje, garantindo que não perde o seu carrinho. Ao continuar a navegar, concorda com a nossa política.</p>
+    </div>
+    <button class="btn btn-glow" (click)="aceitarCookies()">Entendi</button>
+  </div>
+}

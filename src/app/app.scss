@@ -548,6 +548,75 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
   }
 }
 
+.cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 20px;
+  width: 90%;
+  max-width: 700px;
+  box-sizing: border-box;
+  margin-inline: auto;
+  background: rgba(38, 33, 32, 0.98);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid $dourado;
+  border-radius: 20px;
+  padding: 20px 25px;
+  z-index: 2000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+
+  .cookie-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    svg {
+      width: 35px;
+      height: 35px;
+      color: $dourado;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      color: $texto-principal;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  }
+
+  .btn {
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .cookie-banner {
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    border-radius: 24px 24px 0 0;
+    border-bottom: none;
+    flex-direction: column;
+    text-align: center;
+
+    .cookie-content {
+      flex-direction: column;
+
+      svg { margin-bottom: 5px; }
+    }
+
+    .btn { width: 100%; }
+  }
+}
+
 /* =========================================
    RODAPÉ
    ========================================= */
@@ -662,4 +731,5 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
     .item-info .item-nome { font-size: 0.9rem; }
     .item-info .item-subtotal { font-size: 0.9rem; }
   }
+
 }

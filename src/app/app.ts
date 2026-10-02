@@ -6,7 +6,7 @@ interface Produto {
   nome: string;
   descricao: string;
   preco: number;
-  imagem?: string; // <- Nova linha adicionada
+  imagem?: string;
 }
 
 interface ItemCarrinho {
@@ -24,27 +24,69 @@ interface ItemCarrinho {
 export class App implements OnInit {
   produtos: Produto[] = [];
   carrinho: ItemCarrinho[] = [];
+  mostrarAvisoCookies: boolean = false;
   
-  // Injetamos o ChangeDetectorRef no construtor
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
+    this.verificarConsentimentoCookies();
     this.carregarCardapio();
+    this.carregarCarrinho();
   }
 
- async carregarCardapio() {
-    try {
-      // O caminho foi alterado para apontar diretamente para a raiz (pasta public)
-      const resposta = await fetch('/cardapio.json');
+  // --- LÓGICA DE COOKIES E ESTADO DO CARRINHO ---
+
+  verificarConsentimentoCookies() {
+    const consentimento = localStorage.getItem('xicas_cookies_aceites');
+    if (!consentimento) {
+      this.mostrarAvisoCookies = true;
+    }
+  }
+
+  aceitarCookies() {
+    localStorage.setItem('xicas_cookies_aceites', 'true');
+    this.mostrarAvisoCookies = false;
+  }
+
+  obterDataAtual(): string {
+    const hoje = new Date();
+    // Retorna formato AAAA-MM-DD
+    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+  }
+
+  salvarCarrinho() {
+    const estadoCarrinho = {
+      data: this.obterDataAtual(),
+      itens: this.carrinho
+    };
+    localStorage.setItem('xicas_carrinho_diario', JSON.stringify(estadoCarrinho));
+  }
+
+  carregarCarrinho() {
+    const dadosGuardados = localStorage.getItem('xicas_carrinho_diario');
+    
+    if (dadosGuardados) {
+      const estadoCarrinho = JSON.parse(dadosGuardados);
       
+      // Verifica se o carrinho guardado é do dia de hoje
+      if (estadoCarrinho.data === this.obterDataAtual()) {
+        this.carrinho = estadoCarrinho.itens;
+      } else {
+        // Se for de um dia anterior, limpa o registo antigo
+        localStorage.removeItem('xicas_carrinho_diario');
+        this.carrinho = [];
+      }
+    }
+  }
+
+  // --- LÓGICA DO CARDÁPIO ---
+
+  async carregarCardapio() {
+    try {
+      const resposta = await fetch('/cardapio.json');
       if (resposta.ok) {
         this.produtos = await resposta.json();
-        
-        // Força o Angular a atualizar o ecrã com os novos dados
         this.cdr.detectChanges();
-        
-      } else {
-        console.error('Erro ao carregar o cardápio:', resposta.statusText);
       }
     } catch (erro) {
       console.error('Erro de rede ao tentar carregar o cardápio:', erro);
@@ -67,6 +109,7 @@ export class App implements OnInit {
     } else {
       this.carrinho.push({ produto, quantidade: 1 });
     }
+    this.salvarCarrinho(); // Guarda a alteração
   }
 
   removerDoCarrinho(produtoId: number) {
@@ -78,6 +121,7 @@ export class App implements OnInit {
       } else {
         this.carrinho.splice(index, 1);
       }
+      this.salvarCarrinho(); // Guarda a alteração
     }
   }
 
@@ -96,6 +140,10 @@ export class App implements OnInit {
     
     const telefoneWhatsApp = "5548999999999"; 
     const url = `https://wa.me/${telefoneWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+    
+    // Limpa o carrinho após finalizar o pedido para não acumular no dia
+    this.carrinho = [];
+    this.salvarCarrinho();
     
     window.open(url, '_blank');
   }
