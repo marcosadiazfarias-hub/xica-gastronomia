@@ -48,13 +48,6 @@
             @if (produto.imagem) {
               <img [src]="produto.imagem" [alt]="produto.nome" class="produto-img">
             } @else {
-              <!-- Ícone de substituição se não houver foto no JSON -->
-              <!-- Área da Imagem Preparada -->
-          <div class="card-image-placeholder">
-            @if (produto.imagem) {
-              <img [src]="produto.imagem" [alt]="produto.nome" class="produto-img">
-            } @else {
-              <!-- Ícone de Garfo e Faca -->
               <div class="img-fallback">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
@@ -62,8 +55,6 @@
                   <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
                 </svg>
               </div>
-            }
-          </div>
             }
           </div>
 
