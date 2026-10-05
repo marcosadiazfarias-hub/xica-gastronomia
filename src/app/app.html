@@ -34,50 +34,108 @@
     } @else {
       <div class="admin-dashboard">
         <div class="admin-header">
-          <h3>Gestão de Cardápio</h3>
-          <button class="btn btn-outline" (click)="fazerLogout()" style="padding: 8px 16px;">Sair (Logout)</button>
+          <h3>Painel de Gestão</h3>
+          <button class="btn btn-outline" (click)="fazerLogout()" style="padding: 8px 16px;">Sair</button>
         </div>
 
-        <div class="crud-form glass-panel">
-          <h4>{{ editando ? 'Editar Produto' : 'Cadastrar Novo Produto' }}</h4>
-          <input type="text" placeholder="Nome do Prato" [(ngModel)]="produtoForm.nome" class="form-input">
-          <input type="text" placeholder="Descrição curta" [(ngModel)]="produtoForm.descricao" class="form-input">
-          <input type="number" placeholder="Preço (ex: 35.50)" [(ngModel)]="produtoForm.preco" class="form-input">
-          
-          <label style="color: #a89f9d; margin-bottom: 5px; display: block; font-size: 0.9rem;">Imagem do Prato</label>
-          <input type="file" (change)="selecionarImagem($event)" accept="image/*" class="form-input" style="padding: 12px;">
-          
-          <!-- Pré-visualização da imagem atual -->
-          @if (editando && produtoForm.imagem && !arquivoSelecionado) {
-            <div style="margin-bottom: 15px;">
-              <img [src]="produtoForm.imagem" alt="Atual" style="height: 60px; border-radius: 8px;">
+        <!-- Botões de Navegação do Admin -->
+        <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+          <button class="btn w-100" [class.btn-glow]="abaAdmin === 'pedidos'" [class.btn-outline]="abaAdmin !== 'pedidos'" (click)="abaAdmin = 'pedidos'; carregarPedidosAdmin()">Controle de Pedidos</button>
+          <button class="btn w-100" [class.btn-glow]="abaAdmin === 'cardapio'" [class.btn-outline]="abaAdmin !== 'cardapio'" (click)="abaAdmin = 'cardapio'">Gestão do Cardápio</button>
+        </div>
+
+        <!-- ABA 1: CONTROLE DE PEDIDOS -->
+        @if (abaAdmin === 'pedidos') {
+          <div class="crud-list" style="margin-top: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h4>Fila de Pedidos</h4>
+              <button class="btn-icon-small" (click)="carregarPedidosAdmin()" title="Atualizar Fila">🔄</button>
             </div>
-          }
-          
-          <div class="form-actions" style="margin-top: 15px; display: flex; gap: 10px;">
-            <button class="btn btn-glow" (click)="salvarProduto()" [disabled]="aCarregarImagem" style="flex: 1;">
-              {{ aCarregarImagem ? 'Enviando imagem...' : 'Salvar Produto' }}
-            </button>
-            @if (editando) {
-              <button class="btn btn-outline" (click)="cancelarEdicao()">Cancelar</button>
+            
+            @if (listaPedidos.length === 0) {
+              <p style="color: #a89f9d; text-align: center;">Nenhum pedido registado ainda.</p>
             }
-          </div>
-        </div>
 
-        <div class="crud-list">
-          <h4>Pratos Ativos no Menu</h4>
-          <ul>
-            @for (prod of produtos; track prod.id) {
-              <li class="admin-list-item">
-                <span style="font-weight: 600;">{{ prod.nome }} <span style="color: #d4af37; margin-left: 10px;">R$ {{ prod.preco.toFixed(2) }}</span></span>
-                <div>
-                  <button class="btn-icon-small" (click)="editarProduto(prod)" title="Editar">✏️</button>
-                  <button class="btn-icon-small" (click)="excluirProduto(prod.id)" title="Apagar" style="color: #ea1d2c;">🗑️</button>
-                </div>
-              </li>
+            <ul style="display: flex; flex-direction: column; gap: 15px;">
+              @for (pedido of listaPedidos; track pedido.id) {
+                <li class="glass-panel" style="padding: 15px; border-left: 4px solid #d4af37;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <strong style="color: #d4af37; font-size: 1.1rem;">#{{ pedido.codigo }}</strong>
+                    <span style="color: #a89f9d; font-size: 0.85rem;">{{ pedido.criadoEm | date:'dd/MM HH:mm' }}</span>
+                  </div>
+                  
+                  <div style="margin-bottom: 15px; font-size: 0.9rem;">
+                    @for (item of pedido.itens; track item.produto.id) {
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span>{{ item.quantidade }}x {{ item.produto.nome }}</span>
+                      </div>
+                    }
+                    <div style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; text-align: right;">
+                      <strong>Total: R$ {{ pedido.total.toFixed(2) }}</strong>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                    <label style="font-size: 0.85rem; color: #a89f9d;">Status:</label>
+                    <select class="form-input" style="margin: 0; padding: 8px;" 
+                            [ngModel]="pedido.status" 
+                            (ngModelChange)="atualizarStatusPedido(pedido.id, $event)">
+                      <option value="pendente">🟡 Pendente (Analisar)</option>
+                      <option value="aceito">🔵 Aceito</option>
+                      <option value="producao">🟣 Em Produção</option>
+                      <option value="concluido">🟢 Concluído (Pronto)</option>
+                      <option value="entregue">⚪ Entregue</option>
+                      <option value="cancelado">🔴 Cancelado</option>
+                    </select>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        <!-- ABA 2: GESTÃO DE CARDÁPIO -->
+        @if (abaAdmin === 'cardapio') {
+          <div class="crud-form glass-panel">
+            <h4>{{ editando ? 'Editar Produto' : 'Cadastrar Novo Produto' }}</h4>
+            <input type="text" placeholder="Nome do Prato" [(ngModel)]="produtoForm.nome" class="form-input">
+            <input type="text" placeholder="Descrição curta" [(ngModel)]="produtoForm.descricao" class="form-input">
+            <input type="number" placeholder="Preço (ex: 35.50)" [(ngModel)]="produtoForm.preco" class="form-input">
+            
+            <label style="color: #a89f9d; margin-bottom: 5px; display: block; font-size: 0.9rem;">Imagem do Prato</label>
+            <input type="file" (change)="selecionarImagem($event)" accept="image/*" class="form-input" style="padding: 12px;">
+            
+            @if (editando && produtoForm.imagem && !arquivoSelecionado) {
+              <div style="margin-bottom: 15px;">
+                <img [src]="produtoForm.imagem" alt="Atual" style="height: 60px; border-radius: 8px;">
+              </div>
             }
-          </ul>
-        </div>
+            
+            <div class="form-actions" style="margin-top: 15px; display: flex; gap: 10px;">
+              <button class="btn btn-glow" (click)="salvarProduto()" [disabled]="aCarregarImagem" style="flex: 1;">
+                {{ aCarregarImagem ? 'Enviando imagem...' : 'Salvar Produto' }}
+              </button>
+              @if (editando) {
+                <button class="btn btn-outline" (click)="cancelarEdicao()">Cancelar</button>
+              }
+            </div>
+          </div>
+
+          <div class="crud-list">
+            <h4>Pratos Ativos no Menu</h4>
+            <ul>
+              @for (prod of produtos; track prod.id) {
+                <li class="admin-list-item">
+                  <span style="font-weight: 600;">{{ prod.nome }} <span style="color: #d4af37; margin-left: 10px;">R$ {{ prod.preco.toFixed(2) }}</span></span>
+                  <div>
+                    <button class="btn-icon-small" (click)="editarProduto(prod)" title="Editar">✏️</button>
+                    <button class="btn-icon-small" (click)="excluirProduto(prod.id)" title="Apagar" style="color: #ea1d2c;">🗑️</button>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        }
       </div>
     }
     </section>
@@ -107,7 +165,7 @@
       <p class="subtitle">Descubra as nossas especialidades, ajuste as quantidades e levante no nosso Food Truck sem filas.</p>
     </div>
     
-    <!-- Grelha de Produtos carregada do cardapio.json -->
+    <!-- Grelha de Produtos carregada do banco -->
     <div class="grid-produtos">
       @for (produto of produtos; track produto.id) {
         <div class="produto-card premium-card">

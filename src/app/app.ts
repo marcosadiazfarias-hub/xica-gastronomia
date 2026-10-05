@@ -1,21 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from '@angular/fire/firestore';
-import { Auth, signInWithEmailAndPassword, signOut, authState, sendPasswordResetEmail } from '@angular/fire/auth';
-
-interface Produto {
-  id: string;
-  nome: string;
-  descricao: string;
-  preco: number;
-  imagem?: string;
-}
-
-interface ItemCarrinho {
-  produto: Produto;
-  quantidade: number;
-}
+import { CartService, ItemCarrinho } from './cart.service';
+import { XicaAuthService } from './xica-auth.service';
+import { XicaDataService, Produto } from './xica-data.service';
+import { XicaOrderService } from './xica-order.service';
 
 @Component({
   selector: 'app-root',
@@ -25,24 +14,27 @@ interface ItemCarrinho {
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
+  private readonly whatsappPhoneNumber = '5548999999999';
+
   produtos: Produto[] = [];
   carrinho: ItemCarrinho[] = [];
-  mostrarAvisoCookies: boolean = false;
-  
-  // Injeções do Firebase
-  private firestore: Firestore = inject(Firestore);
-  private auth: Auth = inject(Auth);
-  
-  // Variáveis de Estado do Painel de Administração
-  modoAdmin: boolean = false;
-  usuarioAutenticado: boolean = false;
+  mostrarAvisoCookies = false;
+
+  private readonly cartService = inject(CartService);
+  private readonly xicaAuthService = inject(XicaAuthService);
+  private readonly xicaDataService = inject(XicaDataService);
+  private readonly xicaOrderService = inject(XicaOrderService);
+
+  modoAdmin = false;
+  abaAdmin: 'cardapio' | 'pedidos' = 'pedidos';
+  listaPedidos: any[] = [];
+  usuarioAutenticado = false;
   credenciais = { email: '', senha: '' };
   produtoForm: Produto = { id: '', nome: '', descricao: '', preco: 0, imagem: '' };
-  editando: boolean = false;
+  editando = false;
 
-  // Variáveis para upload de imagem
   arquivoSelecionado: File | null = null;
-  aCarregarImagem: boolean = false;
+  aCarregarImagem = false;
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -51,11 +43,32 @@ export class App implements OnInit {
     this.carregarCardapio();
     this.carregarCarrinho();
 
-    // Observa silenciosamente se o administrador está logado ou não
-    authState(this.auth).subscribe(user => {
+    this.xicaAuthService.authState$().subscribe(user => {
       this.usuarioAutenticado = !!user;
+      if (user) {
+        this.carregarPedidosAdmin();
+      }
       this.cdr.detectChanges();
     });
+  }
+
+  async carregarPedidosAdmin() {
+    if (!this.usuarioAutenticado) return;
+    try {
+      this.listaPedidos = await this.xicaOrderService.carregarPedidosAdmin();
+      this.cdr.detectChanges();
+    } catch (erro) {
+      console.error('Erro ao carregar pedidos:', erro);
+    }
+  }
+
+  async atualizarStatusPedido(pedidoId: string, novoStatus: string) {
+    try {
+      await this.xicaOrderService.atualizarStatusPedido(pedidoId, novoStatus);
+      await this.carregarPedidosAdmin();
+    } catch (erro) {
+      alert('Erro ao atualizar status.');
+    }
   }
 
   // =========================================
@@ -70,7 +83,7 @@ export class App implements OnInit {
   async fazerLogin() {
     if (!this.credenciais.email || !this.credenciais.senha) return;
     try {
-      await signInWithEmailAndPassword(this.auth, this.credenciais.email, this.credenciais.senha);
+      await this.xicaAuthService.login(this.credenciais.email, this.credenciais.senha);
       this.credenciais = { email: '', senha: '' }; 
     } catch (erro: any) {
       console.error(erro);
@@ -84,7 +97,7 @@ export class App implements OnInit {
       return;
     }
     try {
-      await sendPasswordResetEmail(this.auth, this.credenciais.email);
+      await this.xicaAuthService.recuperarSenha(this.credenciais.email);
       alert('E-mail de recuperação enviado! Verifique a sua caixa de entrada.');
     } catch (erro: any) {
       console.error(erro);
@@ -93,7 +106,7 @@ export class App implements OnInit {
   }
 
   async fazerLogout() {
-    await signOut(this.auth);
+    await this.xicaAuthService.logout();
     this.modoAdmin = false;
   }
 
@@ -106,48 +119,11 @@ export class App implements OnInit {
   async salvarProduto() {
     this.aCarregarImagem = true;
     try {
-      let urlImagem = this.produtoForm.imagem || '';
-
-      // Upload para o ImgBB caso uma nova imagem seja selecionada
-      if (this.arquivoSelecionado) {
-        const formData = new FormData();
-        formData.append('image', this.arquivoSelecionado);
-        
-        const imgbbApiKey = 'b3f31f9199de6a761c8e77b15ee1dbfd'; 
-        
-        const resposta = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
-          method: 'POST',
-          body: formData
-        });
-        
-        const dadosImgbb = await resposta.json();
-        
-        if (dadosImgbb.success) {
-          urlImagem = dadosImgbb.data.url;
-        } else {
-          throw new Error('Falha no servidor de imagens.');
-        }
-      }
-
-      const dadosLimpos = {
-        nome: this.produtoForm.nome,
-        descricao: this.produtoForm.descricao,
-        preco: this.produtoForm.preco,
-        imagem: urlImagem
-      };
-
-      if (this.editando) {
-        const docRef = doc(this.firestore, 'cardapio', this.produtoForm.id);
-        await updateDoc(docRef, dadosLimpos);
-      } else {
-        const cardapioRef = collection(this.firestore, 'cardapio');
-        await addDoc(cardapioRef, dadosLimpos);
-      }
-      
+      await this.xicaDataService.salvarProduto(this.produtoForm, this.arquivoSelecionado, this.editando);
       this.cancelarEdicao();
       await this.carregarCardapio();
     } catch (erro) {
-      console.error("Erro ao salvar:", erro);
+      console.error('Erro ao salvar:', erro);
       alert('Ocorreu um erro ao salvar o prato. Verifique a sua ligação.');
     } finally {
       this.aCarregarImagem = false;
@@ -163,8 +139,7 @@ export class App implements OnInit {
   async excluirProduto(id: string) {
     if (confirm('Tem a certeza absoluta de que deseja excluir este prato do menu?')) {
       try {
-        const docRef = doc(this.firestore, 'cardapio', id);
-        await deleteDoc(docRef);
+        await this.xicaDataService.excluirProduto(id);
         await this.carregarCardapio();
       } catch (erro) {
         alert('Erro ao tentar excluir.');
@@ -193,43 +168,20 @@ export class App implements OnInit {
   }
 
   obterDataAtual(): string {
-    const hoje = new Date();
-    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+    return this.cartService.obterDataAtual();
   }
 
   salvarCarrinho() {
-    const estadoCarrinho = { data: this.obterDataAtual(), itens: this.carrinho };
-    localStorage.setItem('xicas_carrinho_diario', JSON.stringify(estadoCarrinho));
+    this.cartService.salvarCarrinho(this.carrinho);
   }
 
   carregarCarrinho() {
-    const dadosGuardados = localStorage.getItem('xicas_carrinho_diario');
-    if (dadosGuardados) {
-      const estadoCarrinho = JSON.parse(dadosGuardados);
-      if (estadoCarrinho.data === this.obterDataAtual()) {
-        this.carrinho = estadoCarrinho.itens;
-      } else {
-        localStorage.removeItem('xicas_carrinho_diario');
-        this.carrinho = [];
-      }
-    }
+    this.carrinho = this.cartService.carregarCarrinho();
   }
 
   async carregarCardapio() {
     try {
-      const cardapioRef = collection(this.firestore, 'cardapio');
-      const querySnapshot = await getDocs(cardapioRef);
-      
-      this.produtos = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id, 
-          nome: data['nome'],
-          descricao: data['descricao'],
-          preco: data['preco'],
-          imagem: data['imagem']
-        } as Produto;
-      });
+      this.produtos = await this.xicaDataService.carregarCardapio();
       this.cdr.detectChanges();
     } catch (erro) {
       console.error('Erro ao conectar com o banco de dados:', erro);
@@ -237,11 +189,11 @@ export class App implements OnInit {
   }
 
   get total(): number {
-    return this.carrinho.reduce((soma, item) => soma + (item.produto.preco * item.quantidade), 0);
+    return this.cartService.total(this.carrinho);
   }
 
   get totalItens(): number {
-    return this.carrinho.reduce((total, item) => total + item.quantidade, 0);
+    return this.cartService.totalItens(this.carrinho);
   }
 
   adicionarAoCarrinho(produto: Produto) {
@@ -266,21 +218,33 @@ export class App implements OnInit {
     }
   }
 
+  async gerarCodigoPedido(): Promise<string> {
+    return this.xicaOrderService.gerarCodigoPedido();
+  }
+
   finalizarPedido() {
     if (this.carrinho.length === 0) return;
-    
-    let mensagem = "Olá *Xica's Gastronomia*! Gostaria de fazer o seguinte pedido para retirada no Food Truck:\n\n";
+
+    const codigoPedido = this.xicaOrderService.gerarCodigoPedidoOffline();
+
+    void this.xicaOrderService.salvarPedido(this.carrinho, this.total)
+      .catch((erro) => {
+        console.error('Erro ao salvar pedido no banco, mas enviando pro Whats...', erro);
+      });
+
+    let mensagem = `Olá *Xica's Gastronomia*! Gostaria de fazer o seguinte pedido para retirada no Food Truck:\n\n`;
+    mensagem += `🎫 *PEDIDO:* #${codigoPedido}\n\n`;
+
     this.carrinho.forEach(item => {
       const subtotal = (item.produto.preco * item.quantidade).toFixed(2).replace('.', ',');
       mensagem += `🔸 ${item.quantidade}x ${item.produto.nome} (R$ ${subtotal})\n`;
     });
-    
+
     mensagem += `\n💰 *Total do Pedido: R$ ${this.total.toFixed(2).replace('.', ',')}*`;
     mensagem += `\n📍 Aguardo a confirmação do tempo de preparo.`;
-    
-    const telefoneWhatsApp = "5548999999999"; 
-    const url = `https://wa.me/${telefoneWhatsApp}?text=${encodeURIComponent(mensagem)}`;
-    
+
+    const url = `https://wa.me/${this.whatsappPhoneNumber}?text=${encodeURIComponent(mensagem)}`;
+
     this.carrinho = [];
     this.salvarCarrinho();
     window.open(url, '_blank');

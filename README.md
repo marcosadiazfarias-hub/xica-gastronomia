@@ -1,111 +1,177 @@
 ```markdown
-# 🍔 Xica's Gastronomia - Menu Digital & Pedidos
+# 🍔 Xica Gastronomia
 
-Uma aplicação web moderna, responsiva e focada na experiência do utilizador (UX) construída para digitalizar o atendimento de um Food Truck premium[cite: 13]. O sistema funciona como um cardápio digital interativo com gestão de carrinho local e integração direta para finalização de pedidos via WhatsApp[cite: 13].
-
----
-
-## 🚀 Funcionalidades Principais
-
-* **Design Premium (Dark Mode Exclusivo):** Interface desenvolvida inteiramente sem a utilização da cor branca, aplicando uma paleta de tons de café (`#1a1615`), vermelho bordô e dourado[cite: 13]. Elementos de *glassmorphism* (fundos translúcidos com desfoque) proporcionam um aspeto moderno[cite: 13].
-* **Carrinho de Compras Adaptativo:** 
-  * **Desktop:** Apresenta-se como uma barra lateral fixa (Side-bar) à direita, redimensionando automaticamente a grelha de produtos para evitar sobreposições[cite: 13].
-  * **Mobile:** Transforma-se numa aba inferior nativa (Bottom-sheet) fixada à base do ecrã, maximizando a área de visualização e facilitando o uso com uma só mão[cite: 13].
-* **Persistência de Dados (Local Storage):** O estado do carrinho é guardado no navegador do utilizador associado à data atual[cite: 13]. Se o cliente fechar a página e voltar no mesmo dia, o pedido continua lá[cite: 13]. No dia seguinte, o carrinho é limpo automaticamente[cite: 13].
-* **Checkout via WhatsApp:** Ao finalizar, o sistema calcula os totais e formata uma mensagem de texto limpa e detalhada, redirecionando o utilizador diretamente para o WhatsApp do estabelecimento[cite: 13].
-* **Aviso de Privacidade / Cookies:** Banner interativo integrado para consentimento de utilização de armazenamento local (cumprimento de boas práticas web)[cite: 13].
-* **Gestão Dinâmica de Cardápio em Tempo Real (Firebase):** Sistema de administração integrado e oculto que permite adicionar, editar e excluir pratos dinamicamente, com os dados guardados em nuvem e sincronizados instantaneamente com a vitrine do cliente.
-* **Upload Automático de Imagens (ImgBB):** Tratamento de imagens nativo na plataforma. Ao cadastrar um produto com fotografia, a imagem é enviada silenciosamente via API para um servidor em nuvem gratuito (ImgBB), substituindo o ícone vetorial padrão do restaurante pela foto real.
-* **Autenticação Segura:** Área de gestão protegida por login (e-mail e palavra-passe) com Firebase Authentication, garantindo que apenas a equipa do restaurante tem acesso ao painel.
+Aplicação web em Angular para um food truck premium, com cardápio digital, carrinho de compras, autenticação de administração e integração direta com WhatsApp para fechamento de pedidos.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🚀 Visão Geral
 
-* **Framework Frontend:** Angular (v17+) com abordagem *Standalone Components* (sem `app.module.ts`)[cite: 13].
-* **Backend as a Service:** Firebase (Firestore Database para dados em tempo real e Firebase Authentication para segurança).
-* **Armazenamento de Média:** ImgBB API para alojamento otimizado de imagens.
-* **Estilização:** SCSS (Sass) puro com variáveis CSS avançadas, *media queries* e animações *keyframes* customizadas[cite: 13].
-* **Linguagem:** TypeScript e HTML5 semântico[cite: 13].
-* **Integrações Externas:** API Fetch (nativa do JavaScript) e WhatsApp Web/App API (`wa.me`)[cite: 13].
+A plataforma oferece:
+
+- cardápio interativo com catálogo dinâmico
+- carrinho persistente em localStorage
+- checkout via WhatsApp com resumo do pedido
+- painel administrativo com login seguro
+- gestão de produtos, imagens e fila de pedidos
+- armazenamento centralizado no Firebase
+- upload de imagens para ImgBB
+
+A arquitetura atual foi reorganizada para separar responsabilidades em serviços, mantendo a interface do usuário focada na experiência de compra e administração.
 
 ---
 
-## 📁 Estrutura de Ficheiros Relevantes
+## 🛠️ Stack
 
-A arquitetura do projeto foi desenhada de forma modular e limpa. Os ficheiros principais são:
+- Angular 22
+- Standalone Components
+- TypeScript
+- Firebase Auth + Firestore
+- SCSS
+- RxJS
+
+---
+
+## 📁 Estrutura Principal
 
 ```text
 xica/
-├── public/
-│   ├── logo.jpg             # Logomarca do estabelecimento
-│   └── favicon.ico          # Ícone do navegador
 ├── src/
-│   └── app/
-│       ├── app.ts           # Lógica principal, integração Firebase, ImgBB e carrinho
-│       ├── app.html         # Estrutura visual da vitrine e painel de administração restrito
-│       ├── app.scss         # Variáveis de cor, design responsivo e animações
-│       └── app.config.ts    # Configurações globais e chaves de ambiente do Firebase
-└── angular.json             # Configurações do compilador Angular
-
+│   ├── app/
+│   │   ├── app.ts
+│   │   ├── app.html
+│   │   ├── app.scss
+│   │   ├── app.config.ts
+│   │   ├── app.spec.ts
+│   │   ├── cart.service.ts
+│   │   ├── cart.service.spec.ts
+│   │   ├── xica-auth.service.ts
+│   │   ├── xica-auth.service.spec.ts
+│   │   ├── xica-data.service.ts
+│   │   ├── xica-data.service.spec.ts
+│   │   ├── xica-order.service.ts
+│   │   └── xica-order.service.spec.ts
+│   └── environments/
+│       └── environment.ts
+├── package.json
+├── angular.json
+├── tsconfig.json
+├── README.md
+└── public/
 ```
 
 ---
 
-## ⚙️ Como Configurar e Executar
+## 🔐 Configuração de Ambiente
 
-1. **Pré-requisitos:** Certifique-se de que tem o Node.js e o Angular CLI instalados na sua máquina.
+As credenciais do Firebase e da API ImgBB devem ser mantidas em `src/environments/environment.ts`.
 
+Exemplo de estrutura:
 
-2. **Instalar Dependências:** Na raiz do projeto, execute o comando de instalação do Node e instale os pacotes do Firebase:
+```ts
+export const environment = {
+  production: false,
+  firebaseConfig: {
+    apiKey: '...',
+    authDomain: '...',
+    projectId: '...',
+    storageBucket: '...',
+    messagingSenderId: '...',
+    appId: '...',
+    measurementId: '...'
+  },
+  imgbbApiKey: '...'
+};
+```
+
+Essas configurações são injetadas em `app.config.ts` para inicializar Firebase e serviços de autenticação/firestore.
+
+---
+
+## ▶️ Como Executar
+
+Pré-requisitos:
+
+- Node.js 18+ 
+- npm
+
+Instale as dependências:
 
 ```bash
 npm install
-npm install firebase @angular/fire
-
 ```
 
-3. **Credenciais:** Certifique-se de que o ficheiro `src/app/app.config.ts` contém as chaves válidas do seu projeto Firebase.
-4. **Executar o Servidor de Desenvolvimento:**
+Inicie a aplicação:
 
 ```bash
-ng serve
-
+npm start
 ```
 
-5. **Visualizar a Aplicação:** Abra o navegador e aceda a `http://localhost:4200`.
+Ou diretamente:
 
+```bash
+npx ng serve
+```
 
+A aplicação fica disponível em:
+
+```text
+http://localhost:4200
+```
 
 ---
 
-## 📝 Como Atualizar o Cardápio (Painel do Administrador)
+## 🧪 Testes
 
-A gestão do menu é feita inteiramente através de uma interface visual e amigável integrada no próprio site. Não é necessário editar código.
+A suíte inclui testes unitários para o componente principal e para os serviços de domínio.
 
-### 1. Acesso à Área Restrita
+Para rodar os testes:
 
-1. Desça a página inicial até ao rodapé (onde se lê "Todos os direitos reservados").
+```bash
+npx ng test --watch=false --browsers=chromium
+```
 
+Para gerar cobertura:
 
-2. Clique no ícone de engrenagem (**⚙️**).
+```bash
+npx ng test --watch=false --browsers=chromium --code-coverage
+```
 
+---
 
-3. Na janela de login, insira o e-mail e a palavra-passe registados pela equipa.
+## 🧩 Fluxo de Negócio
 
-### 2. Cadastrar ou Editar Pratos
+### Cliente
 
-* **Para Cadastrar:** Preencha os campos com o Nome do Prato, Descrição, Preço e clique em "Escolher ficheiro" para anexar a fotografia. Clique em "Salvar Produto". O sistema fará o upload para a nuvem automaticamente.
-* **Para Editar:** Na lista de pratos ativos logo abaixo do formulário, clique no ícone do lápis (**✏️**). Os dados subirão para o formulário para poderem ser corrigidos.
-* **Para Excluir:** Clique no ícone de reciclagem vermelho (**🗑️**) ao lado do produto. O prato desaparecerá imediatamente do menu dos clientes.
+- visualiza o cardápio
+- adiciona e remove itens do carrinho
+- recebe aviso de cookies
+- finaliza pedido via WhatsApp
+
+### Administração
+
+- acessa painel oculto no rodapé
+- realiza login com Firebase Auth
+- adiciona, edita e remove produtos
+- visualiza pedidos em fila
+- atualiza status dos pedidos
+
+---
+
+## 📝 Observações de Manutenção
+
+A lógica da aplicação foi separada em serviços para facilitar manutenção e testes:
+
+- `CartService`: manipulação do carrinho e persistência
+- `XicaAuthService`: autenticação e recuperação de senha
+- `XicaDataService`: leitura/escrita do cardápio e upload de imagens
+- `XicaOrderService`: geração de pedidos, fila e atualização de status
 
 ---
 
 ## 👨‍💻 Autor
 
-Desenvolvido e arquitetado por **Marcos André Díaz Farias**.
-*Engenharia de Software • Desenvolvimento Backend e Frontend • Automação e Integrações*
+Desenvolvido por **Marcos André Díaz Farias**.
 
-```
 
 ```

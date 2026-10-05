@@ -9,6 +9,9 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  runTransaction,
+  query,
+  orderBy,
 } from '@angular/fire/firestore';
 import {
   Auth,
@@ -29,6 +32,9 @@ vi.mock('@angular/fire/firestore', () => ({
   updateDoc: vi.fn(),
   deleteDoc: vi.fn(),
   doc: vi.fn((_fs, path, id) => ({ path, id })),
+  runTransaction: vi.fn(),
+  query: vi.fn((_ref, ..._args) => ({ ref: _ref })),
+  orderBy: vi.fn((_field, _direction) => ({ field: _field, direction: _direction })),
 }));
 
 vi.mock('@angular/fire/auth', () => ({
@@ -83,6 +89,9 @@ describe('App', () => {
     localStorage.clear();
     authSubject.next(null);
 
+    vi.mocked(runTransaction).mockReset();
+    vi.mocked(query).mockClear();
+    vi.mocked(orderBy).mockClear();
     vi.mocked(getDocs).mockResolvedValue(createFirestoreDocsMock(catalogoTeste) as any);
 
     await TestBed.configureTestingModule({
@@ -226,6 +235,45 @@ describe('App', () => {
     expect(component.totalItens).toBe(1);
   });
 
+  it('generates a sequential order code when Firestore transaction is available', async () => {
+    vi.mocked(runTransaction).mockImplementation(async (_fs, updater) => {
+      const transaction = {
+        get: vi.fn().mockResolvedValue({
+          exists: () => false,
+          data: () => ({})
+        }),
+        set: vi.fn(),
+      };
+      return await updater(transaction as any);
+    });
+
+    const code = await component.gerarCodigoPedido();
+
+    expect(runTransaction).toHaveBeenCalled();
+    expect(code).toMatch(/^\d{2}\d{2}\d{2}-\d{2}\d{2}-\d{3}$/);
+  });
+
+  it('falls back to an offline order code when Firestore transactions are unavailable', async () => {
+    vi.mocked(runTransaction).mockRejectedValueOnce(new Error('transaction unavailable'));
+
+    const code = await component.gerarCodigoPedido();
+
+    expect(runTransaction).toHaveBeenCalled();
+    expect(code).toMatch(/^\d{2}\d{2}\d{2}-\d{2}\d{2}-F\d{3}$/);
+  });
+
+  it('keeps the checkout flow working even when saving the order to Firestore fails', async () => {
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+    vi.mocked(addDoc).mockRejectedValueOnce(new Error('Firestore failed'));
+    component.carrinho = [{ produto: component.produtos[0], quantidade: 1 }];
+
+    component.finalizarPedido();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(openSpy).toHaveBeenCalledOnce();
+    expect(addDoc).toHaveBeenCalled();
+  });
+
   it('does not open WhatsApp when the cart is empty', () => {
     const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
 
@@ -333,9 +381,11 @@ describe('App', () => {
 
     it('updates usuarioAutenticado when authState emits changes', () => {
       authSubject.next({ email: 'admin@xica.com' });
+      fixture.detectChanges();
       expect(component.usuarioAutenticado).toBe(true);
 
       authSubject.next(null);
+      fixture.detectChanges();
       expect(component.usuarioAutenticado).toBe(false);
     });
 
@@ -422,6 +472,66 @@ describe('App', () => {
 
       expect(signOut).toHaveBeenCalled();
       expect(component.modoAdmin).toBe(false);
+    });
+
+    it('loads the order queue when the admin is authenticated', async () => {
+      const pedidos = [
+        {
+          id: 'pedido-1',
+          codigo: '250101-1234',
+          total: 42.5,
+          criadoEm: '2026-10-05T12:00:00.000Z',
+          status: 'pendente',
+          itens: [{ produto: catalogoTeste[0], quantidade: 1 }],
+        },
+      ];
+
+      vi.mocked(getDocs).mockResolvedValueOnce({
+        docs: pedidos.map(pedido => ({
+          id: pedido.id,
+          data: () => ({
+            codigo: pedido.codigo,
+            total: pedido.total,
+            criadoEm: pedido.criadoEm,
+            status: pedido.status,
+            itens: pedido.itens,
+          }),
+        })),
+      } as any);
+
+      component.usuarioAutenticado = true;
+      await component.carregarPedidosAdmin();
+
+      expect(query).toHaveBeenCalled();
+      expect(orderBy).toHaveBeenCalledWith('criadoEm', 'desc');
+      expect(component.listaPedidos).toHaveLength(1);
+      expect(component.listaPedidos[0].codigo).toBe('250101-1234');
+    });
+
+    it('updates the status of an order and refreshes the queue', async () => {
+      vi.mocked(updateDoc).mockResolvedValueOnce();
+      vi.mocked(getDocs).mockResolvedValueOnce({ docs: [] } as any);
+      component.usuarioAutenticado = true;
+
+      await component.atualizarStatusPedido('pedido-1', 'aceito');
+
+      expect(doc).toHaveBeenCalledWith(expect.anything(), 'pedidos', 'pedido-1');
+      expect(updateDoc).toHaveBeenCalledWith(expect.anything(), { status: 'aceito' });
+      expect(component.listaPedidos).toEqual([]);
+    });
+
+    it('keeps the empty order queue state when there are no orders', () => {
+      component.abrirPainelAdmin();
+      component.usuarioAutenticado = true;
+      component.abaAdmin = 'pedidos';
+      component.listaPedidos = [];
+
+      fixture.detectChanges();
+
+      expect(component.modoAdmin).toBe(true);
+      expect(component.usuarioAutenticado).toBe(true);
+      expect(component.abaAdmin).toBe('pedidos');
+      expect(component.listaPedidos).toEqual([]);
     });
   });
 
