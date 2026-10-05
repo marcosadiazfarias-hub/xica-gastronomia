@@ -41,12 +41,11 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
   100% { transform: scale(1); }
 }
 
-/* Animação do Carrinho no PC (entra pela direita) */
 @keyframes slideInRight {
   from { opacity: 0; transform: translateX(100%); }
   to { opacity: 1; transform: translateX(0); }
 }
-/* Animação do Carrinho no Mobile (entra por baixo) */
+
 @keyframes slideUpCart {
   from { opacity: 0; transform: translateY(100%); }
   to { opacity: 1; transform: translateY(0); }
@@ -282,10 +281,9 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
   .text-center { text-align: center; }
 }
 
-/* Truque moderno: Se o carrinho existe, a secção do cardápio recua no PC para não ser tapada */
 @media (min-width: 901px) {
   #cardapio:has(.glass-cart) {
-    padding-right: 360px; /* Dá espaço para a barra lateral direita */
+    padding-right: 360px;
   }
 }
 
@@ -406,10 +404,10 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
    ========================================= */
 .glass-cart {
   position: fixed;
-  top: 100px; /* Posicionado no topo abaixo do cabeçalho */
-  right: 20px; /* Encostado à direita */
-  width: 330px; /* Largura mais estreita e elegante */
-  max-height: calc(100vh - 120px); /* Ocupa quase toda a altura */
+  top: 100px;
+  right: 20px; 
+  width: 330px; 
+  max-height: calc(100vh - 120px); 
   background: rgba(26, 22, 21, 0.96); 
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -459,7 +457,7 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
   .cart-footer {
     border-top: 1px solid $fundo-terciario;
     padding-top: 15px;
-    margin-top: auto; /* Empurra sempre para o fundo */
+    margin-top: auto;
 
     .total-carrinho { 
       font-size: 1.5rem; 
@@ -476,7 +474,7 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
    ========================================= */
 .carrinho-item {
   display: flex;
-  flex-direction: column; /* Coloca nome em cima, controlos em baixo para poupar espaço lateral */
+  flex-direction: column; 
   align-items: stretch;
   gap: 8px;
   padding: 12px 0 !important;
@@ -597,26 +595,6 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
   }
 }
 
-@media (max-width: 600px) {
-  .cookie-banner {
-    bottom: 0;
-    width: 100%;
-    max-width: none;
-    border-radius: 24px 24px 0 0;
-    border-bottom: none;
-    flex-direction: column;
-    text-align: center;
-
-    .cookie-content {
-      flex-direction: column;
-
-      svg { margin-bottom: 5px; }
-    }
-
-    .btn { width: 100%; }
-  }
-}
-
 /* =========================================
    RODAPÉ
    ========================================= */
@@ -678,10 +656,9 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
   }
 
   .modern-footer {
-    padding-bottom: 180px; /* Dá espaço para o carrinho mobile não tapar os textos de autor */
+    padding-bottom: 180px;
   }
 
-  /* Carrinho no telemóvel: Baseado na base, muito mais achatado e subtil */
   .glass-cart {
     top: auto;
     bottom: 0;
@@ -691,13 +668,8 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
     max-width: 100%;
     border-radius: 24px 24px 0 0; 
     border-bottom: none;
-    padding: 15px 15px 20px; /* Paddings bem menores */
-    max-height: 70vh; /* Altura máxima dinâmica */
-  }
-
-  /* Altera a animação para subir (porque vem de baixo) */
-  .animate-slide-up {
-    animation: slideUpCart 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    padding: 15px 15px 20px;
+    max-height: 70vh; 
   }
 
   .glass-cart .cart-header {
@@ -707,7 +679,7 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
   }
 
   .glass-cart .lista-carrinho {
-    max-height: 25vh; /* Lista de produtos bem curta, usa scroll rapidamente! */
+    max-height: 25vh; 
     margin-bottom: 10px;
   }
 
@@ -719,17 +691,128 @@ $sombra-vermelha: 0 10px 25px rgba(168, 28, 35, 0.25);
     }
     
     .whatsapp-btn {
-      padding: 10px; /* Botão mais fino */
+      padding: 10px; 
       font-size: 0.95rem;
     }
   }
 
   .carrinho-item {
-    padding: 8px 0 !important; /* Itens encostados uns aos outros para poupar espaço */
+    padding: 8px 0 !important; 
     gap: 4px;
     
     .item-info .item-nome { font-size: 0.9rem; }
     .item-info .item-subtotal { font-size: 0.9rem; }
   }
 
+  .cookie-banner {
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    border-radius: 24px 24px 0 0;
+    border-bottom: none;
+    flex-direction: column;
+    text-align: center;
+
+    .cookie-content {
+      flex-direction: column;
+      svg { margin-bottom: 5px; }
+    }
+
+    .btn { width: 100%; }
+  }
+}
+
+/* =========================================
+   PAINEL DE ADMINISTRAÇÃO E CRUD
+   ========================================= */
+.admin-panel {
+  border: 1px solid $dourado !important;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 18px 24px;
+  margin-bottom: 20px;
+  border-radius: 50px; 
+  border: 2px solid rgba(212, 175, 55, 0.2);
+  background: rgba(26, 22, 21, 0.8);
+  color: #e3dcd1;
+  font-size: 1.1rem; 
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  
+  &::placeholder {
+    color: #a89f9d;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #d4af37;
+    background: rgba(38, 33, 32, 0.95);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.login-form, .crud-form {
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.crud-form.glass-panel {
+  padding: 30px;
+  margin-bottom: 40px;
+  text-align: left;
+  h4 { color: $dourado; margin-bottom: 20px; font-size: 1.2rem; }
+}
+
+.admin-dashboard {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid $fundo-terciario;
+  padding-bottom: 15px;
+  h3 { margin: 0; font-size: 1.5rem; color: $texto-principal; }
+}
+
+.admin-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: $fundo-principal;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid $fundo-terciario;
+  transition: border-color 0.2s;
+
+  &:hover { border-color: $dourado; }
+
+  .btn-icon-small {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: 15px;
+    transition: transform 0.2s;
+    
+    &:hover { transform: scale(1.2); }
+  }
 }

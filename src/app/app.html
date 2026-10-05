@@ -13,6 +13,75 @@
 </header>
 
 <main>
+  <!-- PAINEL DE ADMINISTRAÇÃO (Invisível para os clientes) -->
+@if (modoAdmin) {
+  <section class="section-modern bg-light admin-panel animate-fade-in-up" style="margin-top: 100px;">
+    <div class="section-header text-center">
+      <h2>Área Restrita</h2>
+      <button class="btn btn-outline" (click)="abrirPainelAdmin()">Voltar à Vitrine</button>
+    </div>
+
+    @if (!usuarioAutenticado) {
+      <div class="login-form glass-panel" style="margin-top: 40px; padding: 40px;">
+        <h3 style="color: #d4af37; margin-bottom: 25px; text-align: center;">Acesso da Equipe</h3>
+        <input type="email" placeholder="E-mail de acesso" [(ngModel)]="credenciais.email" class="form-input">
+        <input type="password" placeholder="Senha" [(ngModel)]="credenciais.senha" class="form-input">
+        <button class="btn btn-glow w-100" (click)="fazerLogin()" style="margin-top: 10px;">Entrar</button>
+        <button class="btn btn-outline w-100" (click)="recuperarSenha()" style="margin-top: 15px; border: none; color: #a89f9d; font-size: 0.9rem;">
+          Esqueci a Senha
+        </button>
+      </div>
+    } @else {
+      <div class="admin-dashboard">
+        <div class="admin-header">
+          <h3>Gestão de Cardápio</h3>
+          <button class="btn btn-outline" (click)="fazerLogout()" style="padding: 8px 16px;">Sair (Logout)</button>
+        </div>
+
+        <div class="crud-form glass-panel">
+          <h4>{{ editando ? 'Editar Produto' : 'Cadastrar Novo Produto' }}</h4>
+          <input type="text" placeholder="Nome do Prato" [(ngModel)]="produtoForm.nome" class="form-input">
+          <input type="text" placeholder="Descrição curta" [(ngModel)]="produtoForm.descricao" class="form-input">
+          <input type="number" placeholder="Preço (ex: 35.50)" [(ngModel)]="produtoForm.preco" class="form-input">
+          
+          <label style="color: #a89f9d; margin-bottom: 5px; display: block; font-size: 0.9rem;">Imagem do Prato</label>
+          <input type="file" (change)="selecionarImagem($event)" accept="image/*" class="form-input" style="padding: 12px;">
+          
+          <!-- Pré-visualização da imagem atual -->
+          @if (editando && produtoForm.imagem && !arquivoSelecionado) {
+            <div style="margin-bottom: 15px;">
+              <img [src]="produtoForm.imagem" alt="Atual" style="height: 60px; border-radius: 8px;">
+            </div>
+          }
+          
+          <div class="form-actions" style="margin-top: 15px; display: flex; gap: 10px;">
+            <button class="btn btn-glow" (click)="salvarProduto()" [disabled]="aCarregarImagem" style="flex: 1;">
+              {{ aCarregarImagem ? 'Enviando imagem...' : 'Salvar Produto' }}
+            </button>
+            @if (editando) {
+              <button class="btn btn-outline" (click)="cancelarEdicao()">Cancelar</button>
+            }
+          </div>
+        </div>
+
+        <div class="crud-list">
+          <h4>Pratos Ativos no Menu</h4>
+          <ul>
+            @for (prod of produtos; track prod.id) {
+              <li class="admin-list-item">
+                <span style="font-weight: 600;">{{ prod.nome }} <span style="color: #d4af37; margin-left: 10px;">R$ {{ prod.preco.toFixed(2) }}</span></span>
+                <div>
+                  <button class="btn-icon-small" (click)="editarProduto(prod)" title="Editar">✏️</button>
+                  <button class="btn-icon-small" (click)="excluirProduto(prod.id)" title="Apagar" style="color: #ea1d2c;">🗑️</button>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+    </section>
+  }
   <!-- Hero Section Imersiva -->
   <section id="inicio">
     <div class="hero-overlay"></div>
@@ -133,7 +202,7 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <p>&copy; 2026 Todos os direitos reservados.</p>
+    <p>&copy; 2026 Todos os direitos reservados. | <a href="javascript:void(0)" (click)="abrirPainelAdmin()" style="color: inherit; text-decoration: none; font-size: 1.1rem;" title="Acesso Restrito">⚙️</a></p>
   </div>
 </footer>
 
