@@ -87,6 +87,7 @@ describe('App', () => {
 
   beforeEach(async () => {
     localStorage.clear();
+    document.body.style.overflow = '';
     authSubject.next(null);
 
     vi.mocked(runTransaction).mockReset();
@@ -329,6 +330,18 @@ describe('App', () => {
 
       expect(localStorage.getItem('xicas_cookies_aceites')).toBe('true');
       expect(component.mostrarAvisoCookies).toBe(false);
+    });
+
+    it('opens and closes the LGPD modal while locking page scroll', () => {
+      component.abrirLGPD();
+
+      expect(component.mostrarModalLGPD).toBe(true);
+      expect(document.body.style.overflow).toBe('hidden');
+
+      component.fecharLGPD();
+
+      expect(component.mostrarModalLGPD).toBe(false);
+      expect(document.body.style.overflow).toBe('');
     });
   });
 

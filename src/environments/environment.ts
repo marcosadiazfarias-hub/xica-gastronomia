@@ -1,5 +1,13 @@
 export const environment = {
   production: false,
+
+  // 1. Dados do Cliente (Troque apenas aqui para cada novo negócio)
+  cliente: {
+    nome: "Xica's Gastronomia",
+    whatsapp: "55489999999xx", // Coloque o número do WhatsApp com DDD e sem espaços ou traços
+    mensagemPadrao: "Gostaria de fazer o seguinte pedido para retirada no Food Truck:"
+  },
+
   firebaseConfig: {
     apiKey: 'AIzaSyDl9o3OMnsX3vULGMgVZcSMdUUrDbALEZE',
     authDomain: 'xica-gastronomia.firebaseapp.com',

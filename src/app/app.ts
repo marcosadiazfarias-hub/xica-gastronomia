@@ -1,10 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 import { CartService, ItemCarrinho } from './cart.service';
 import { XicaAuthService } from './xica-auth.service';
 import { XicaDataService, Produto } from './xica-data.service';
 import { XicaOrderService } from './xica-order.service';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +16,10 @@ import { XicaOrderService } from './xica-order.service';
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
-  private readonly whatsappPhoneNumber = '5548999999999';
+  mostrarModalLGPD = false;
+  nomeCliente = environment.cliente.nome;
+  private readonly whatsappPhoneNumber = environment.cliente.whatsapp;
+  private readonly titleService = inject(Title);
 
   produtos: Produto[] = [];
   carrinho: ItemCarrinho[] = [];
@@ -38,7 +43,18 @@ export class App implements OnInit {
 
   constructor(private cdr: ChangeDetectorRef) {}
 
+  abrirLGPD() {
+    this.mostrarModalLGPD = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  fecharLGPD() {
+    this.mostrarModalLGPD = false;
+    document.body.style.overflow = '';
+  }
+
   ngOnInit() {
+    this.titleService.setTitle(`${this.nomeCliente} | Cardápio Digital`);
     this.verificarConsentimentoCookies();
     this.carregarCardapio();
     this.carregarCarrinho();
@@ -77,7 +93,7 @@ export class App implements OnInit {
 
   abrirPainelAdmin() {
     this.modoAdmin = !this.modoAdmin;
-    if (this.modoAdmin) window.scrollTo(0, 0); // Sobe para o topo ao abrir o painel
+    if (this.modoAdmin) window.scrollTo(0, 0); 
   }
 
   async fazerLogin() {
@@ -232,7 +248,7 @@ export class App implements OnInit {
         console.error('Erro ao salvar pedido no banco, mas enviando pro Whats...', erro);
       });
 
-    let mensagem = `Olá *Xica's Gastronomia*! Gostaria de fazer o seguinte pedido para retirada no Food Truck:\n\n`;
+    let mensagem = `Olá *${this.nomeCliente}*! ${environment.cliente.mensagemPadrao}\n\n`;
     mensagem += `🎫 *PEDIDO:* #${codigoPedido}\n\n`;
 
     this.carrinho.forEach(item => {

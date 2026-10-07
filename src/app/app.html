@@ -1,7 +1,7 @@
 <!-- Cabeçalho Flutuante Moderno -->
 <header class="floating-header">
   <div class="logo-container">
-    <img src="logo.jpg" alt="Logo Xica's Gastronomia">
+    <img src="logo.jpg" alt="Logo {{ nomeCliente }}">
   </div>
   <nav>
     <ul>
@@ -148,7 +148,7 @@
         <span class="badge">Novo Food Truck</span>
         <h1 class="gradient-text">Sabor e Amor<br>Sobre Rodas</h1>
         <p class="hero-text">
-          A <strong>Xica's Gastronomia</strong> eleva o conceito de street food. 
+          A <strong>{{ nomeCliente }}</strong> eleva o conceito de street food. 
           Ingredientes premium, receitas exclusivas e uma experiência gastronómica inesquecível.
         </p>
         <div class="hero-actions">
@@ -238,7 +238,7 @@
   <section id="ifood" class="section-modern delivery-section">
     <div class="delivery-container">
       <div class="delivery-text">
-        <h2>O Sabor da Xica's em sua Casa</h2>
+        <h2>O Sabor da {{ nomeCliente }} em sua Casa</h2>
         <p>Receba a nossa gastronomia no conforto do seu lar. Disponível agora nas melhores plataformas.</p>
         <a href="https://www.ifood.com.br/" class="btn btn-ifood" target="_blank" rel="noopener noreferrer">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.2L10 2h4l3.8 4H21a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2"/><circle cx="8" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
@@ -252,15 +252,15 @@
 <footer class="modern-footer">
   <div class="footer-content">
     <div class="footer-logo">
-      <img src="logo.jpg" alt="Logo Xica's">
+      <img src="logo.jpg" alt="Logo {{ nomeCliente }}">
     </div>
     <div class="footer-info">
-      <h3>Xica's Gastronomia</h3>
+      <h3>{{ nomeCliente }}</h3>
       <p>Sabor e Amor • Desde 2026</p>
     </div>
   </div>
   <div class="footer-bottom">
-    <p>&copy; 2026 Todos os direitos reservados. | <a href="javascript:void(0)" (click)="abrirPainelAdmin()" style="color: inherit; text-decoration: none; font-size: 1.1rem;" title="Acesso Restrito">⚙️</a></p>
+    <p>&copy; 2026 Todos os direitos reservados. | <a href="javascript:void(0)" (click)="abrirLGPD()" style="color: #a89f9d; text-decoration: underline;">LGPD e Privacidade</a> | <a href="javascript:void(0)" (click)="abrirPainelAdmin()" style="color: inherit; text-decoration: none; font-size: 1.1rem;" title="Acesso Restrito">⚙️</a></p>
   </div>
 </footer>
 
@@ -269,8 +269,38 @@
   <div class="cookie-banner animate-slide-up">
     <div class="cookie-content">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 12.5v.01"/><path d="M12 16v.01"/><path d="M11 12.5v.01"/></svg>
-      <p>Utilizamos cookies e armazenamento local para guardar os itens do seu pedido durante o dia de hoje, garantindo que não perde o seu carrinho. Ao continuar a navegar, concorda com a nossa política.</p>
+      <p>Utilizamos cookies e armazenamento local para manter o seu carrinho ativo. <a href="javascript:void(0)" (click)="abrirLGPD()" style="color: #d4af37; text-decoration: underline; white-space: nowrap;">Saiba mais</a>.</p>
     </div>
     <button class="btn btn-glow" (click)="aceitarCookies()">Entendi</button>
+  </div>
+}
+
+<!-- Modal Suspenso LGPD -->
+@if (mostrarModalLGPD) {
+  <div class="modal-overlay animate-fade-in-up" (click)="fecharLGPD()" style="animation-duration: 0.3s;">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Privacidade e LGPD</h3>
+        <button class="btn-close" (click)="fecharLGPD()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>A <strong>{{ nomeCliente }}</strong> valoriza a sua privacidade e atua em conformidade com a Lei Geral de Proteção de Dados (LGPD).</p>
+        
+        <h4>1. Recolha de Dados</h4>
+        <p>Não recolhemos dados pessoais sensíveis. Apenas processamos os itens que adiciona ao carrinho para viabilizar o seu pedido.</p>
+        
+        <h4>2. Armazenamento Local</h4>
+        <p>Utilizamos o armazenamento local (Local Storage) do seu navegador temporariamente para não perder o seu pedido caso feche a aba. Não usamos cookies de rastreio publicitário.</p>
+        
+        <h4>3. Partilha e Envio</h4>
+        <p>Ao finalizar a encomenda, o seu pedido é formatado e enviado diretamente via WhatsApp. Não partilhamos, vendemos ou retemos os seus dados de contacto no nosso banco de dados público.</p>
+        
+        <h4>4. Os seus Direitos</h4>
+        <p>Tem o direito de apagar os dados do seu carrinho a qualquer momento, bastando para isso limpar o cache do seu navegador ou apagar os itens manualmente na interface.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-glow w-100" (click)="fecharLGPD()">Compreendi</button>
+      </div>
+    </div>
   </div>
 }
